@@ -28,8 +28,8 @@ public class Main {
         List<Book> bookList = new ArrayList<>();
 
 
-        bookList.add(new Book("No Longer At Ease", "978-1", 5));
-        bookList.add(new Book("Thing Fall Apart", "978-0", 2));
+        bookList.add(new Book("No Longer At Ease", "978-1", 7));
+        bookList.add(new Book("Thing Fall Apart", "978-0", 10));
         bookList.add(new Book("Macbeth", "978-0-06-112008-4", 7));
         bookList.add(new Book("Merchant of Venice", "978-0-7432-7356-5", 4));
 

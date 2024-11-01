@@ -13,7 +13,7 @@ import java.util.Queue;
 
 public class LibraryServiceImpl implements LibraryService {
 
-    private Library library;
+    private final Library library;
     public LibraryServiceImpl (Library library){
         this.library=library;
     }
@@ -24,46 +24,41 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public void borrowBookByPriority(List<Person> borrowers, String isbn){
         Book book = findByISBN(isbn);
-        PriorityQueue<Person> queue = new PriorityQueue<>(new PersonPriorityComparator());
+        Queue<Person> queue = new PriorityQueue<>(new PersonPriorityComparator());
         queue.addAll(borrowers);
-        while(!queue.isEmpty()){
-            Person person = queue.poll();
-            if(person.canBorrow(book)){
-                book.setCopies(book.getCopies() - 1);
-                System.out.println(person.getRole().name() + " Successfully borrowed book" + " " + book.getTitle() + " " + book.getIsbn() );
-            }else{
-                System.out.println("Book is not available");
-            }
-
+        performBorrowBook(queue, book);
         }
-
+        private void performBorrowBook(Queue<Person> queue, Book book){
+            queue.stream().filter(person -> {
+                if(person.canBorrow(book)){
+                    book.setCopies(book.getCopies() - 1);
+                    return true;
+                }else {
+                    throw new RuntimeException("Book copies all borrowed");
+                }
+            }).forEach(person -> System.out.println(person.getRole().name() + " Successfully borrowed book" + " " + book.getTitle() + " " + book.getIsbn() ) );
     }
+
+
 
     @Override
     public void borrowBookByFifo(List<Person> borrowers, String isbn) {
         Book book = findByISBN(isbn);
         Queue<Person> personQueue = new LinkedList<>(borrowers);
-        while(!personQueue.isEmpty()){
-            Person person = personQueue.poll();
-            if(person.canBorrow(book)){
-                book.setCopies(book.getCopies() - 1);
-                System.out.println(person.getRole().name() + " Successfully borrowed" + " " + book.getTitle() + " " + book.getIsbn());
-            }else{
-                System.out.println("Book is not available");
-            }
-
-        }
+        performBorrowBook(personQueue, book);
 
     }
+
+
     public Book findByISBN (String isbn){
-        for(Book book: library.getCollection()){
-            if (book.getIsbn().equalsIgnoreCase(isbn)){
-                return book;
-            }
-        }
-        throw new RuntimeException("book not found");
+        return getCollection().stream()
+                .filter(b -> b.getIsbn().equalsIgnoreCase(isbn))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("book not found"));
+
 
     }
 
 
 }
+
